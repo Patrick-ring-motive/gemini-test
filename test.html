@@ -82,6 +82,69 @@
   const messages = $('messages');
   let previousResponseId = null;
   let controller = null;
+  let saveTimer = null;
+  let saveQueue = Promise.resolve();
+  const chatCache = 'gemini-responses-console-v1';
+  const chatKey = new Request(new URL('/__gemini_responses_console_chat__', location.origin));
+  const cachePromise = 'caches' in window ? caches.open(chatCache) : Promise.resolve(null);
+
+  function emptyState() {
+    const empty = document.createElement('div'); empty.className='empty'; empty.id='empty';
+    const content = document.createElement('div');
+    const title = document.createElement('strong'); title.textContent='Start a conversation';
+    content.append(title, 'Messages use the Responses API and server-side state.');
+    empty.append(content); return empty;
+  }
+
+  function chatState() {
+    return {
+      version: 1,
+      previousResponseId,
+      messages: [...messages.querySelectorAll('.message')].map((root) => ({
+        role: root.classList.contains('user') ? 'user' : 'assistant',
+        text: root.querySelector('.bubble')?.textContent ?? '',
+        meta: root.querySelector('.meta')?.textContent ?? '',
+        error: root.classList.contains('error')
+      }))
+    };
+  }
+
+  function persistChat() {
+    clearTimeout(saveTimer); saveTimer = null;
+    const state = chatState();
+    saveQueue = saveQueue.then(async () => {
+      const cache = await cachePromise;
+      if (cache) await cache.put(chatKey, Response.json(state, {
+        headers: { 'Cache-Control':'private, max-age=31536000' }
+      }));
+    }).catch(() => {});
+    return saveQueue;
+  }
+
+  function schedulePersist() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(persistChat, 200);
+  }
+
+  async function restoreChat() {
+    try {
+      const cache = await cachePromise;
+      const response = await cache?.match(chatKey);
+      if (!response) return;
+      const state = await response.json();
+      if (state?.version !== 1 || !Array.isArray(state.messages)) return;
+      messages.replaceChildren();
+      for (const item of state.messages) {
+        if (!item || !['user','assistant'].includes(item.role) || typeof item.text !== 'string') continue;
+        const message = addMessage(item.role, item.text, item.error ? 'error' : '');
+        if (typeof item.meta === 'string') message.meta.textContent = item.meta;
+      }
+      if (!messages.children.length) messages.append(emptyState());
+      previousResponseId = typeof state.previousResponseId === 'string' ? state.previousResponseId : null;
+      $('conversation').textContent = previousResponseId ?? 'New conversation';
+      messages.lastElementChild?.scrollIntoView({ block:'end' });
+    } catch {}
+  }
 
   function addMessage(role, text = '', className = '') {
     $('empty')?.remove();
@@ -117,9 +180,11 @@
         if (event.type === 'response.output_text.delta') {
           message.bubble.textContent += event.delta ?? '';
           message.root.scrollIntoView({ block:'end' });
+          schedulePersist();
         } else if (event.type === 'response.completed' || event.type === 'response.incomplete') {
           previousResponseId = event.response?.id ?? previousResponseId;
           $('conversation').textContent = previousResponseId ?? 'New conversation';
+          schedulePersist();
         } else if (event.type === 'response.failed' || event.type === 'error') {
           throw new Error(event.response?.error?.message ?? event.message ?? 'Streaming request failed');
         }
@@ -134,6 +199,7 @@
     if (!prompt || controller) return;
     addMessage('user', prompt); $('prompt').value = '';
     const assistant = addMessage('assistant');
+    schedulePersist();
     controller = new AbortController(); setBusy(true);
     try {
       const body = { model:$('model').value.trim(), input:prompt, stream:true, store:true };
@@ -146,6 +212,7 @@
       });
       assistant.meta.textContent = [response.headers.get('X-Gemini-Model'), response.headers.get('X-Gemini-Service-Tier')]
         .filter(Boolean).join(' · ');
+      schedulePersist();
       if (!response.ok) {
         const error = await response.json().catch(() => null);
         throw new Error(error?.error?.message ?? `HTTP ${response.status}`);
@@ -155,19 +222,20 @@
     } catch (error) {
       if (error.name === 'AbortError') assistant.bubble.textContent ||= '(Stopped)';
       else { assistant.root.classList.add('error'); assistant.bubble.textContent = error.message; }
-    } finally { controller = null; setBusy(false); $('prompt').focus(); }
+    } finally { controller = null; setBusy(false); await persistChat(); $('prompt').focus(); }
   });
 
   $('stop').addEventListener('click', () => controller?.abort());
-  $('reset').addEventListener('click', () => {
+  $('reset').addEventListener('click', async () => {
+    clearTimeout(saveTimer); saveTimer = null;
     previousResponseId = null; messages.replaceChildren();
-    const empty = document.createElement('div'); empty.className='empty'; empty.id='empty';
-    empty.innerHTML='<div><strong>Start a conversation</strong>Messages use the Responses API and server-side state.</div>';
-    messages.append(empty); $('conversation').textContent='New conversation'; $('prompt').focus();
+    messages.append(emptyState()); $('conversation').textContent='New conversation';
+    await saveQueue; const cache = await cachePromise; await cache?.delete(chatKey); $('prompt').focus();
   });
   $('prompt').addEventListener('keydown', (event) => {
     if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); $('form').requestSubmit(); }
   });
+  restoreChat();
 </script>
 </body>
 </html>
