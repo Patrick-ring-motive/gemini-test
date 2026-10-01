@@ -1,5 +1,3 @@
-You’re right — I didn’t actually provide the corrected code in that response. Here it is:
-
 <!doctype html>
 <html lang="en">
 <head>
@@ -358,28 +356,42 @@ function extractText(data) {
     })
     .join("");
 }
+  
+function getModelId(modelName) {
+  return modelName.startsWith("models/")
+    ? modelName.slice(7)
+    : modelName;
+}
+
 function buildUrl(modelName, streaming) {
   const method =
     streaming
       ? "streamGenerateContent"
       : "generateContent";
+
   const url = new URL(
-    `${API_ROOT}/models/${encodeURIComponent(modelName)}:${method}`
+    `${API_ROOT}/models/${encodeURIComponent(
+      getModelId(modelName)
+    )}:${method}`
   );
+
   url.searchParams.set(
     "key",
     getKey()
   );
+
   if (streaming) {
     url.searchParams.set(
       "alt",
       "sse"
     );
   }
+
   return url;
 }
+  
 function buildBody() {
-  return {
+  const body = {
     contents: [
       {
         role: "user",
@@ -389,11 +401,17 @@ function buildBody() {
           }
         ]
       }
-    ],
-    service_tier:
-      serviceTier.value
+    ]
   };
+
+  if (serviceTier.value !== "standard") {
+    body.service_tier =
+      serviceTier.value;
+  }
+
+  return body;
 }
+  
 function updateActualTier(response) {
   const tier =
     response.headers.get(
