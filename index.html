@@ -1,553 +1,574 @@
 <!doctype html>
+
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Gemini API Explorer</title>
-<style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Gemini Model Explorer</title>
+  <style>
     :root {
-        color-scheme: dark;
-        font-family: system-ui, sans-serif;
+      color-scheme: dark;
+      font-family: system-ui, sans-serif;
     }
-    body {
-        margin: 0;
-        background: #111;
-        color: #eee;
-    }
-    main {
-        width: min(1400px, calc(100% - 24px));
-        margin: 12px auto 48px;
-    }
-    h1, h2 {
-        margin: 16px 0 8px;
-    }
-    section {
-        border: 1px solid #333;
-        border-radius: 8px;
-        padding: 12px;
-        margin: 12px 0;
-        background: #181818;
-    }
-    input, select, textarea, button {
-        box-sizing: border-box;
-        font: inherit;
-    }
-    input, select, textarea {
-        width: 100%;
-        background: #0d0d0d;
-        color: #eee;
-        border: 1px solid #444;
-        border-radius: 5px;
-        padding: 8px;
-    }
-    button {
-        background: #333;
-        color: #fff;
-        border: 1px solid #555;
-        border-radius: 5px;
-        padding: 8px 12px;
-        cursor: pointer;
-    }
-    button:hover {
-        background: #444;
-    }
-    .row {
-        display: flex;
-        gap: 8px;
-        align-items: end;
-        margin: 8px 0;
-    }
-    .row > * {
-        flex: 1;
-    }
-    .row > button {
-        flex: 0 0 auto;
-    }
-    table {
-        width: 100%;
-        border-collapse: collapse;
-        font-size: 14px;
-    }
-    th, td {
-        border-bottom: 1px solid #333;
-        padding: 7px;
-        text-align: left;
-        vertical-align: top;
-    }
-    th {
-        position: sticky;
-        top: 0;
-        background: #181818;
-    }
-    tr.model {
-        cursor: pointer;
-    }
-    tr.model:hover {
-        background: #242424;
-    }
-    .muted {
-        color: #999;
-    }
-    .ok {
-        color: #8f8;
-    }
-    .bad {
-        color: #f88;
-    }
-    pre {
-        white-space: pre-wrap;
-        overflow: auto;
-        max-height: 500px;
-        background: #0b0b0b;
-        border: 1px solid #333;
-        border-radius: 5px;
-        padding: 10px;
-    }
-    #chat {
-        min-height: 100px;
-        resize: vertical;
-    }
-    #answer {
-        min-height: 120px;
-    }
-    .messages {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        margin: 12px 0;
-    }
-    .message {
-        padding: 10px;
-        border-radius: 6px;
-        white-space: pre-wrap;
-    }
-    .user {
-        background: #26354a;
-    }
-    .model {
-        background: #292929;
-    }
-    .error {
-        background: #421d1d;
-        color: #faa;
-        padding: 10px;
-        border-radius: 5px;
-        white-space: pre-wrap;
-    }
-    .small {
-        font-size: 12px;
-    }
-    code {
-        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-    }
-</style>
+body {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 1rem;
+  background: #111;
+  color: #eee;
+}
+h1, h2 {
+  margin-bottom: .5rem;
+}
+section {
+  margin: 1.5rem 0;
+}
+input, select, textarea, button {
+  box-sizing: border-box;
+  width: 100%;
+  padding: .65rem;
+  margin: .25rem 0;
+  border: 1px solid #444;
+  border-radius: 5px;
+  background: #181818;
+  color: inherit;
+  font: inherit;
+}
+textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+button {
+  cursor: pointer;
+  width: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+button:hover {
+  background: #282828;
+}
+.row {
+  display: flex;
+  gap: .5rem;
+  align-items: center;
+}
+.row > * {
+  flex: 1;
+}
+.row button {
+  flex: 0 0 auto;
+}
+.muted {
+  color: #999;
+}
+.error {
+  color: #ff8080;
+  white-space: pre-wrap;
+}
+.ok {
+  color: #80d080;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .9rem;
+}
+th, td {
+  padding: .5rem;
+  border-bottom: 1px solid #333;
+  text-align: left;
+  vertical-align: top;
+}
+th {
+  position: sticky;
+  top: 0;
+  background: #181818;
+}
+pre {
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  background: #181818;
+  padding: 1rem;
+  border-radius: 5px;
+}
+code {
+  color: #ddd;
+}
+.chat {
+  display: flex;
+  flex-direction: column;
+  gap: .75rem;
+}
+.message {
+  padding: .75rem;
+  border-radius: 6px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.user {
+  background: #202a35;
+}
+.assistant {
+  background: #202020;
+}
+.badge {
+  display: inline-block;
+  padding: .15rem .4rem;
+  border-radius: 4px;
+  background: #292929;
+  font-size: .8rem;
+}
+.transform {
+  font-family: monospace;
+  letter-spacing: .03em;
+}
+  </style>
 </head>
 <body>
-<main>
-<h1>Gemini API Explorer</h1>
-<section>
+  <h1>Gemini Model Explorer</h1>
+  <p class="muted">
+    Google Gemini <code>/models</code> browser + chat test.
+    API keys are stored only in this browser.
+  </p>
+  <section>
     <h2>API</h2>
-    <div class="row">
-        <div>
-            <label>
-                API key
-                <input id="apiKey" type="password" autocomplete="off">
-            </label>
-        </div>
-        <button id="loadModels">Load models</button>
-    </div>
-    <div id="status" class="muted"></div>
-</section>
-<section>
+<label>
+  Gemini API key
+  <input id="apiKey" type="password" autocomplete="off"
+    placeholder="AIza...">
+</label>
+<div class="row">
+  <button id="loadModels">Load models</button>
+  <button id="clearKey">Clear key</button>
+</div>
+<div id="apiStatus" class="muted"></div>
+  </section>
+  <section>
+    <h2>Model</h2>
+<select id="modelSelect" disabled>
+  <option value="">Load models first</option>
+</select>
+<div id="modelInfo" class="muted"></div>
+  </section>
+  <section>
     <h2>Models</h2>
-    <div class="row">
-        <div>
-            <label>
-                Filter
-                <input id="modelFilter" placeholder="gemini, flash, etc.">
-            </label>
-        </div>
-        <button id="clearFilter">Clear</button>
-    </div>
-    <div style="overflow:auto; max-height:600px">
-        <table>
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Display name</th>
-                    <th>Input</th>
-                    <th>Output</th>
-                    <th>Methods</th>
-                    <th>Thinking</th>
-                    <th>Version</th>
-                </tr>
-            </thead>
-            <tbody id="models"></tbody>
-        </table>
-    </div>
-</section>
-<section>
-    <h2>Selected model</h2>
-    <select id="model"></select>
-    <h3>Raw model data</h3>
-    <pre id="modelData">Select a model.</pre>
-</section>
-<section>
+<div style="overflow:auto">
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Input</th>
+        <th>Output</th>
+        <th>Thinking</th>
+        <th>Methods</th>
+      </tr>
+    </thead>
+    <tbody id="modelTable"></tbody>
+  </table>
+</div>
+  </section>
+  <section>
     <h2>Chat</h2>
-    <div>
-        <label>
-            Prompt
-            <textarea id="chat" placeholder="Ask Gemini something..."></textarea>
-        </label>
-    </div>
-    <div class="row">
-        <button id="send">Send</button>
-        <button id="sendStream">Send streaming</button>
-        <button id="clearChat">Clear</button>
-    </div>
-    <div id="messages" class="messages"></div>
-    <h3>Raw response</h3>
-    <pre id="rawResponse"></pre>
-</section>
-</main>
-<script>
-(() => {
-    'use strict';
+<div class="transform">
+  API transform:
+  <span class="badge">a→ä</span>
+  <span class="badge">e→ë</span>
+  <span class="badge">i→ï</span>
+  <span class="badge">o→ö</span>
+  <span class="badge">u→ü</span>
+  <span class="badge">y→ÿ</span>
+  <span class="badge">w→ẅ</span>
+</div>
+<textarea id="prompt"
+  placeholder="Enter a prompt..."></textarea>
+<div class="row">
+  <button id="send">Send</button>
+  <button id="stream">Stream</button>
+  <button id="clearChat">Clear</button>
+</div>
+<div id="chat" class="chat"></div>
+  </section>
+  <section>
+    <h2>Last API Request</h2>
+    <pre id="requestRaw"></pre>
+  </section>
+  <section>
+    <h2>Last API Response</h2>
+    <pre id="responseRaw"></pre>
+  </section>
+  <script>
     const API_ROOT = 'https://generativelanguage.googleapis.com/v1beta';
-    const state = {
-        models: [],
-        selectedModel: null,
-        messages: []
+    const STORAGE_KEY = 'gemini-api-key';
+    /*
+     * Deliberately use a single-pass character transform.
+     *
+     * This prevents substitutions from cascading. For example,
+     * "a" becomes "ä" once; the resulting "ä" is never processed
+     * again by the encoder.
+     */
+    const ENCODE = {
+      a: 'ä',
+      e: 'ë',
+      i: 'ï',
+      o: 'ö',
+      u: 'ü',
+      y: 'ÿ',
+      w: 'ẅ',
+      A: 'Ä',
+      E: 'Ë',
+      I: 'Ï',
+      O: 'Ö',
+      U: 'Ü',
+      Y: 'Ÿ',
+      W: 'Ẅ'
     };
-    const $ = (selector) => document.querySelector(selector);
-    const apiKey = $('#apiKey');
-    const status = $('#status');
-    const modelsElement = $('#models');
-    const modelElement = $('#model');
-    const modelData = $('#modelData');
-    const filterElement = $('#modelFilter');
-    const chatElement = $('#chat');
-    const messagesElement = $('#messages');
-    const rawResponse = $('#rawResponse');
-    const savedKey = localStorage.getItem('gemini-api-key');
-    if (savedKey) {
-        apiKey.value = savedKey;
-    }
-    apiKey.addEventListener('input', () => {
-        localStorage.setItem('gemini-api-key', apiKey.value);
+    const DECODE = Object.fromEntries(
+      Object.entries(ENCODE).map(([from, to]) => [to, from])
+    );
+    const apiKey = document.querySelector('#apiKey');
+    const loadModelsButton = document.querySelector('#loadModels');
+    const clearKeyButton = document.querySelector('#clearKey');
+    const apiStatus = document.querySelector('#apiStatus');
+    const modelSelect = document.querySelector('#modelSelect');
+    const modelInfo = document.querySelector('#modelInfo');
+    const modelTable = document.querySelector('#modelTable');
+    const prompt = document.querySelector('#prompt');
+    const sendButton = document.querySelector('#send');
+    const streamButton = document.querySelector('#stream');
+    const clearChatButton = document.querySelector('#clearChat');
+    const chat = document.querySelector('#chat');
+    const requestRaw = document.querySelector('#requestRaw');
+    const responseRaw = document.querySelector('#responseRaw');
+    let models = [];
+    let messages = [];
+    apiKey.value = localStorage.getItem(STORAGE_KEY) ?? '';
+    apiKey.addEventListener('input', function () {
+      localStorage.setItem(STORAGE_KEY, apiKey.value.trim());
     });
-    function setStatus(text, className) {
-        status.textContent = text;
-        status.className = className || 'muted';
+    clearKeyButton.addEventListener('click', function () {
+      apiKey.value = '';
+      localStorage.removeItem(STORAGE_KEY);
+      setStatus('API key cleared.', false);
+    });
+    function setStatus(message, error) {
+      apiStatus.textContent = message;
+      apiStatus.className = error ? 'error' : 'muted';
+    }
+    function transform(text, map) {
+      return [...text]
+        .map(function (character) {
+          return map[character] ?? character;
+        })
+        .join('');
+    }
+    function encode(text) {
+      return transform(text, ENCODE);
+    }
+    function decode(text) {
+      return transform(text, DECODE);
     }
     function getKey() {
-        const key = apiKey.value.trim();
-        if (!key) {
-            throw new Error('Enter a Gemini API key first.');
-        }
-        return key;
-    }
-    async function request(url, options) {
-        const key = getKey();
-        const response = await fetch(url, {
-            ...options,
-            headers: {
-                'x-goog-api-key': key,
-                'content-type': 'application/json',
-                ...(options?.headers || {})
-            }
-        });
-        const text = await response.text();
-        let data;
-        try {
-            data = JSON.parse(text);
-        } catch {
-            data = text;
-        }
-        if (!response.ok) {
-            const message =
-                typeof data === 'string'
-                    ? data
-                    : JSON.stringify(data, null, 2);
-            throw new Error(`${response.status} ${response.statusText}\n${message}`);
-        }
-        return data;
-    }
-    async function loadModels() {
-        try {
-            setStatus('Loading models...');
-            const data = await request(`${API_ROOT}/models`, {
-                method: 'GET'
-            });
-            state.models = data.models || [];
-            renderModels();
-            renderModelSelect();
-            setStatus(
-                `${state.models.length} models returned.`,
-                'ok'
-            );
-        } catch (error) {
-            setStatus(error.message, 'bad');
-        }
-    }
-    function supports(model, method) {
-        return model.supportedGenerationMethods?.includes(method);
-    }
-    function renderModels() {
-        const filter = filterElement.value.trim().toLowerCase();
-        modelsElement.textContent = '';
-        const models = state.models.filter((model) => {
-            if (!filter) {
-                return true;
-            }
-            return JSON.stringify(model)
-                .toLowerCase()
-                .includes(filter);
-        });
-        for (const model of models) {
-            const row = document.createElement('tr');
-            row.className = 'model';
-            row.innerHTML = `
-                <td><code>${escapeHtml(model.name || '')}</code></td>
-                <td>${escapeHtml(model.displayName || '')}</td>
-                <td>${model.inputTokenLimit ?? ''}</td>
-                <td>${model.outputTokenLimit ?? ''}</td>
-                <td>${(model.supportedGenerationMethods || []).join(', ')}</td>
-                <td>${model.thinking ? 'yes' : ''}</td>
-                <td>${escapeHtml(model.version || '')}</td>
-            `;
-            row.addEventListener('click', () => {
-                selectModel(model.name);
-            });
-            modelsElement.append(row);
-        }
-    }
-    function renderModelSelect() {
-        modelElement.textContent = '';
-        const models = state.models
-            .filter((model) => supports(model, 'generateContent'))
-            .sort((a, b) => {
-                return (a.displayName || a.name)
-                    .localeCompare(b.displayName || b.name);
-            });
-        for (const model of models) {
-            const option = document.createElement('option');
-            option.value = model.name;
-            option.textContent =
-                `${model.displayName || model.name} — ${model.name}`;
-            modelElement.append(option);
-        }
-        if (models.length) {
-            selectModel(models[0].name);
-        }
-    }
-    function selectModel(name) {
-        const model = state.models.find((item) => item.name === name);
-        if (!model) {
-            return;
-        }
-        state.selectedModel = model;
-        modelElement.value = model.name;
-        modelData.textContent =
-            JSON.stringify(model, null, 2);
+      const key = apiKey.value.trim();
+      if (!key) {
+        throw new Error('Enter a Gemini API key first.');
+      }
+      return key;
     }
     function getModelName() {
-        const model = state.selectedModel;
-        if (!model) {
-            throw new Error('Select a model first.');
-        }
-        return model.name.replace(/^models\//, '');
+      const value = modelSelect.value;
+      if (!value) {
+        throw new Error('Select a model first.');
+      }
+      return value;
     }
-    function buildContents() {
-        return state.messages.map((message) => ({
-            role: message.role,
-            parts: [
-                {
-                    text: message.text
-                }
-            ]
-        }));
+    function modelEndpoint(model, method) {
+      return `${API_ROOT}/${model}:${method}?key=${encodeURIComponent(getKey())}`;
     }
-    async function send() {
-        try {
-            const prompt = chatElement.value.trim();
-            if (!prompt) {
-                return;
-            }
-            const model = getModelName();
-            state.messages.push({
-                role: 'user',
-                text: prompt
-            });
-            renderMessages();
-            chatElement.value = '';
-            const data = await request(
-                `${API_ROOT}/models/${encodeURIComponent(model)}:generateContent`,
-                {
-                    method: 'POST',
-                    body: JSON.stringify({
-                        contents: buildContents()
-                    })
-                }
-            );
-            rawResponse.textContent =
-                JSON.stringify(data, null, 2);
-            const text = extractText(data);
-            state.messages.push({
-                role: 'model',
-                text
-            });
-            renderMessages();
-        } catch (error) {
-            showError(error);
-        }
+    async function readJsonResponse(response) {
+      const text = await response.text();
+      let data;
+      try {
+        data = JSON.parse(text);
+      } catch {
+        throw new Error(
+          `HTTP ${response.status}\n\n${text}`
+        );
+      }
+      if (!response.ok) {
+        throw new Error(
+          `HTTP ${response.status}\n\n${JSON.stringify(data, null, 2)}`
+        );
+      }
+      return data;
     }
-    async function sendStream() {
-        try {
-            const prompt = chatElement.value.trim();
-            if (!prompt) {
-                return;
-            }
-            const model = getModelName();
-            state.messages.push({
-                role: 'user',
-                text: prompt
-            });
-            renderMessages();
-            chatElement.value = '';
-            const key = getKey();
-            const response = await fetch(
-                `${API_ROOT}/models/${encodeURIComponent(model)}:streamGenerateContent?alt=sse`,
-                {
-                    method: 'POST',
-                    headers: {
-                        'x-goog-api-key': key,
-                        'content-type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        contents: buildContents()
-                    })
-                }
-            );
-            if (!response.ok) {
-                const text = await response.text();
-                throw new Error(
-                    `${response.status} ${response.statusText}\n${text}`
-                );
-            }
-            const reader = response.body.getReader();
-            const decoder = new TextDecoder();
-            let buffer = '';
-            let answer = '';
-            state.messages.push({
-                role: 'model',
-                text: ''
-            });
-            renderMessages();
-            while (true) {
-                const result = await reader.read();
-                if (result.done) {
-                    break;
-                }
-                buffer += decoder.decode(
-                    result.value,
-                    { stream: true }
-                );
-                const events = buffer.split(/\r?\n\r?\n/);
-                buffer = events.pop() || '';
-                for (const event of events) {
-                    const data = parseSSE(event);
-                    if (!data) {
-                        continue;
-                    }
-                    rawResponse.textContent +=
-                        data + '\n';
-                    let json;
-                    try {
-                        json = JSON.parse(data);
-                    } catch {
-                        continue;
-                    }
-                    const text = extractText(json);
-                    if (!text) {
-                        continue;
-                    }
-                    answer += text;
-                    state.messages[state.messages.length - 1].text =
-                        answer;
-                    renderMessages();
-                }
-            }
-        } catch (error) {
-            showError(error);
-        }
-    }
-    function parseSSE(event) {
-        const lines = event.split(/\r?\n/);
-        const data = lines
-            .filter((line) => line.startsWith('data:'))
-            .map((line) => line.slice(5).trim())
-            .join('\n');
-        return data || null;
-    }
-    function extractText(data) {
-        return data?.candidates
-            ?.flatMap((candidate) => candidate.content?.parts || [])
-            ?.map((part) => part.text || '')
-            ?.join('') || '';
-    }
-    function renderMessages() {
-        messagesElement.textContent = '';
-        for (const message of state.messages) {
-            const element = document.createElement('div');
-            element.className =
-                `message ${message.role === 'user' ? 'user' : 'model'}`;
-            element.textContent =
-                `${message.role === 'user' ? 'You' : 'Gemini'}:\n${message.text}`;
-            messagesElement.append(element);
-        }
-    }
-    function showError(error) {
-        const element = document.createElement('div');
-        element.className = 'error';
-        element.textContent = error.message || String(error);
-        messagesElement.append(element);
-    }
-    function clearChat() {
-        state.messages.length = 0;
-        messagesElement.textContent = '';
-        rawResponse.textContent = '';
-    }
-    function escapeHtml(value) {
-        return String(value)
-            .replaceAll('&', '&amp;')
-            .replaceAll('<', '&lt;')
-            .replaceAll('>', '&gt;')
-            .replaceAll('"', '&quot;')
-            .replaceAll("'", '&#039;');
-    }
-    $('#loadModels').addEventListener('click', loadModels);
-    $('#modelFilter').addEventListener(
-        'input',
-        renderModels
-    );
-    $('#clearFilter').addEventListener('click', () => {
-        filterElement.value = '';
+    loadModelsButton.addEventListener('click', loadModels);
+    async function loadModels() {
+      try {
+        setStatus('Loading models...', false);
+        const response = await fetch(
+          `${API_ROOT}/models?key=${encodeURIComponent(getKey())}`
+        );
+        const data = await readJsonResponse(response);
+        models = data.models ?? [];
         renderModels();
-    });
-    modelElement.addEventListener('change', () => {
-        selectModel(modelElement.value);
-    });
-    $('#send').addEventListener('click', send);
-    $('#sendStream').addEventListener('click', sendStream);
-    $('#clearChat').addEventListener('click', clearChat);
-    chatElement.addEventListener('keydown', (event) => {
-        if (event.key === 'Enter' && (event.metaKey || event.ctrlKey)) {
-            event.preventDefault();
-            sendStream();
+        renderModelSelect();
+        setStatus(
+          `Loaded ${models.length} models.`,
+          false
+        );
+      } catch (error) {
+        setStatus(error.message, true);
+      }
+    }
+    function renderModels() {
+      modelTable.textContent = '';
+      const fragment = document.createDocumentFragment();
+      for (const model of models) {
+        const row = document.createElement('tr');
+        const name = document.createElement('td');
+        name.textContent = model.name ?? '';
+        const input = document.createElement('td');
+        input.textContent =
+          model.inputTokenLimit?.toLocaleString() ?? '—';
+        const output = document.createElement('td');
+        output.textContent =
+          model.outputTokenLimit?.toLocaleString() ?? '—';
+        const thinking = document.createElement('td');
+        thinking.textContent =
+          model.thinking
+            ? 'yes'
+            : model.thinkingLevel
+              ? String(model.thinkingLevel)
+              : '—';
+        const methods = document.createElement('td');
+        methods.textContent =
+          model.supportedGenerationMethods?.join(', ') ?? '—';
+        row.append(
+          name,
+          input,
+          output,
+          thinking,
+          methods
+        );
+        fragment.append(row);
+      }
+      modelTable.append(fragment);
+    }
+    function renderModelSelect() {
+      modelSelect.textContent = '';
+      const usableModels = models
+        .filter(function (model) {
+          return model.supportedGenerationMethods?.includes(
+            'generateContent'
+          );
+        })
+        .sort(function (a, b) {
+          return (a.name ?? '').localeCompare(b.name ?? '');
+        });
+      for (const model of usableModels) {
+        const option = document.createElement('option');
+        option.value = model.name;
+        option.textContent = model.name.replace(/^models\//, '');
+        modelSelect.append(option);
+      }
+      modelSelect.disabled = usableModels.length === 0;
+      updateModelInfo();
+    }
+    modelSelect.addEventListener('change', updateModelInfo);
+    function updateModelInfo() {
+      const model = models.find(function (entry) {
+        return entry.name === modelSelect.value;
+      });
+      if (!model) {
+        modelInfo.textContent = '';
+        return;
+      }
+      const methods =
+        model.supportedGenerationMethods?.join(', ') ?? '—';
+      modelInfo.textContent =
+        `${model.name} · ` +
+        `input ${model.inputTokenLimit?.toLocaleString() ?? '—'} · ` +
+        `output ${model.outputTokenLimit?.toLocaleString() ?? '—'} · ` +
+        `methods: ${methods}`;
+    }
+    sendButton.addEventListener('click', send);
+    async function send() {
+      try {
+        const text = prompt.value;
+        if (!text.trim()) {
+          return;
         }
+        const model = getModelName();
+        const encoded = encode(text);
+        appendMessage('user', text);
+        const request = {
+          contents: [
+            {
+              role: 'user',
+              parts: [
+                {
+                  text: encoded
+                }
+              ]
+            }
+          ]
+        };
+        requestRaw.textContent = JSON.stringify(
+          {
+            model,
+            body: request,
+            displayedPrompt: text,
+            encodedPrompt: encoded
+          },
+          null,
+          2
+        );
+        prompt.value = '';
+        const response = await fetch(
+          modelEndpoint(model, 'generateContent'),
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(request)
+          }
+        );
+        const data = await readJsonResponse(response);
+        responseRaw.textContent =
+          JSON.stringify(data, null, 2);
+        const rawText =
+          data.candidates?.[0]?.content?.parts
+            ?.map(function (part) {
+              return part.text ?? '';
+            })
+            .join('') ?? '';
+        const decoded = decode(rawText);
+        appendMessage('assistant', decoded);
+      } catch (error) {
+        appendMessage('assistant', `ERROR\n${error.message}`);
+        responseRaw.textContent = error.message;
+      }
+    }
+    streamButton.addEventListener('click', stream);
+    async function stream() {
+      try {
+        const text = prompt.value;
+        if (!text.trim()) {
+          return;
+        }
+        const model = getModelName();
+        const encoded = encode(text);
+        appendMessage('user', text);
+        const request = {
+          contents: [
+            {
+              role: 'user',
+              parts: [
+                {
+                  text: encoded
+                }
+              ]
+            }
+          ]
+        };
+        requestRaw.textContent = JSON.stringify(
+          {
+            model,
+            body: request,
+            displayedPrompt: text,
+            encodedPrompt: encoded
+          },
+          null,
+          2
+        );
+        prompt.value = '';
+        const url =
+          `${API_ROOT}/${model}:streamGenerateContent` +
+          `?alt=sse&key=${encodeURIComponent(getKey())}`;
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(request)
+        });
+        if (!response.ok) {
+          const data = await response.text();
+          throw new Error(
+            `HTTP ${response.status}\n\n${data}`
+          );
+        }
+        if (!response.body) {
+          throw new Error('Response has no readable body.');
+        }
+        const message = appendMessage('assistant', '');
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        let rawResponse = '';
+        let displayedText = '';
+        while (true) {
+          const result = await reader.read();
+          if (result.done) {
+            break;
+          }
+          buffer += decoder.decode(
+            result.value,
+            { stream: true }
+          );
+          const lines = buffer.split('\n');
+          buffer = lines.pop() ?? '';
+          for (const line of lines) {
+            if (!line.startsWith('data:')) {
+              continue;
+            }
+            const payload = line.slice(5).trim();
+            if (!payload || payload === '[DONE]') {
+              continue;
+            }
+            rawResponse += payload + '\n';
+            let data;
+            try {
+              data = JSON.parse(payload);
+            } catch {
+              continue;
+            }
+            const rawChunk =
+              data.candidates?.[0]?.content?.parts
+                ?.map(function (part) {
+                  return part.text ?? '';
+                })
+                .join('') ?? '';
+            if (!rawChunk) {
+              continue;
+            }
+            displayedText += decode(rawChunk);
+            message.textContent = displayedText;
+          }
+        }
+        responseRaw.textContent = rawResponse;
+      } catch (error) {
+        appendMessage('assistant', `ERROR\n${error.message}`);
+        responseRaw.textContent = error.message;
+      }
+    }
+    function appendMessage(role, text) {
+      const element = document.createElement('div');
+      element.className =
+        `message ${role}`;
+      element.textContent = text;
+      chat.append(element);
+      chat.scrollTop = chat.scrollHeight;
+      return element;
+    }
+    clearChatButton.addEventListener('click', function () {
+      chat.textContent = '';
+      requestRaw.textContent = '';
+      responseRaw.textContent = '';
+      messages = [];
     });
-})();
-</script>
+  </script>
 </body>
 </html>
