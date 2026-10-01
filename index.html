@@ -1,15 +1,17 @@
-<!doctype html>
+<\!doctype html\>
 
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Gemini API Explorer</title>
+
   <style>
     :root {
       color-scheme: dark;
       font-family: system-ui, sans-serif;
     }
+
     body {
       margin: 0;
       padding: 1rem;
@@ -17,19 +19,23 @@
       margin-inline: auto;
       line-height: 1.4;
     }
+
     h1 {
       margin-top: 0;
     }
+
     section {
       margin-block: 1rem;
       padding: 1rem;
       border: 1px solid #444;
       border-radius: 8px;
     }
+
     label {
       display: block;
       margin-block: .5rem;
     }
+
     input,
     select,
     textarea,
@@ -43,36 +49,44 @@
       border: 1px solid #555;
       border-radius: 5px;
     }
+
     button {
       cursor: pointer;
       margin-top: .5rem;
     }
+
     button:hover {
       background: #282828;
     }
+
     textarea {
       min-height: 140px;
       resize: vertical;
     }
+
     .controls {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
       gap: .75rem;
     }
+
     .stats {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
       gap: .5rem;
     }
+
     .stat {
       padding: .6rem;
       border: 1px solid #444;
       border-radius: 5px;
     }
+
     .stat small {
       display: block;
       opacity: .65;
     }
+
     pre {
       overflow: auto;
       white-space: pre-wrap;
@@ -81,18 +95,22 @@
       padding: 1rem;
       border-radius: 5px;
     }
+
     #output {
       min-height: 120px;
     }
+
     #error {
       color: #ff8888;
       white-space: pre-wrap;
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
       font-size: .9rem;
     }
+
     th,
     td {
       text-align: left;
@@ -100,43 +118,54 @@
       border-bottom: 1px solid #333;
       vertical-align: top;
     }
+
     th {
       position: sticky;
       top: 0;
       background: #181818;
     }
+
     .scroll {
       max-height: 500px;
       overflow: auto;
     }
+
     .tier-description {
       margin-top: .5rem;
       opacity: .75;
       font-size: .9rem;
     }
+
     .success {
       color: #8fda8f;
     }
+
     .warning {
       color: #e5c66b;
     }
   </style>
+
 </head>
+
 <body>
+
 <h1>Gemini API Explorer</h1>
+
 <section>
   <h2>Connection</h2>
+
   <label>
     Gemini API key
     <input id="apiKey" type="password" autocomplete="off"
       placeholder="AIza...">
   </label>
+
   <label>
     <input id="rememberKey" type="checkbox">
     Remember API key in localStorage
   </label>
 
-Load Models
+<button id="loadModels">Load Models</button>
 
   <p>
     <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noopener">
@@ -144,15 +173,20 @@ Load Models
     </a>
   </p>
 </section>
+
 <section>
   <h2>Request</h2>
+
   <div class="controls">
+
+```
 <label>
   Model
   <select id="model">
     <option value="">Load models first</option>
   </select>
 </label>
+
 <label>
   Service tier
   <select id="serviceTier">
@@ -161,60 +195,81 @@ Load Models
     <option value="priority">Priority</option>
   </select>
 </label>
+```
+
   </div>
+
   <div id="tierDescription" class="tier-description"></div>
+
   <label>
     Prompt
     <textarea id="prompt">Explain why JavaScript promises are useful for coordinating asynchronous work.</textarea>
   </label>
+
   <div class="controls">
     <button id="generate">Generate</button>
     <button id="stream">Stream</button>
   </div>
 </section>
+
 <section>
   <h2>Result</h2>
+
   <div class="stats">
     <div class="stat">
       <small>Requested tier</small>
       <span id="requestedTier">—</span>
     </div>
+
+```
 <div class="stat">
   <small>Actual tier</small>
   <span id="actualTier">—</span>
 </div>
+
 <div class="stat">
   <small>Latency</small>
   <span id="latency">—</span>
 </div>
+
 <div class="stat">
   <small>Input tokens</small>
   <span id="inputTokens">—</span>
 </div>
+
 <div class="stat">
   <small>Output tokens</small>
   <span id="outputTokens">—</span>
 </div>
+
 <div class="stat">
   <small>Total tokens</small>
   <span id="totalTokens">—</span>
 </div>
+
 <div class="stat">
   <small>HTTP status</small>
   <span id="httpStatus">—</span>
 </div>
+```
+
   </div>
+
   <h3>Text</h3>
   <pre id="output"></pre>
+
   <h3>Error</h3>
   <pre id="error"></pre>
 </section>
+
 <section>
   <h2>Raw Response</h2>
   <pre id="rawResponse"></pre>
 </section>
+
 <section>
   <h2>Available Models</h2>
+
   <div class="scroll">
     <table>
       <thead>
@@ -227,13 +282,20 @@ Load Models
           <th>Methods</th>
         </tr>
       </thead>
+
+```
   <tbody id="modelTable"></tbody>
 </table>
+```
+
   </div>
 </section>
+
 <script>
 "use strict";
+
 const API_ROOT = "https://generativelanguage.googleapis.com/v1beta";
+
 const apiKey = document.getElementById("apiKey");
 const rememberKey = document.getElementById("rememberKey");
 const loadModels = document.getElementById("loadModels");
@@ -243,9 +305,11 @@ const tierDescription = document.getElementById("tierDescription");
 const prompt = document.getElementById("prompt");
 const generate = document.getElementById("generate");
 const stream = document.getElementById("stream");
+
 const output = document.getElementById("output");
 const error = document.getElementById("error");
 const rawResponse = document.getElementById("rawResponse");
+
 const requestedTier = document.getElementById("requestedTier");
 const actualTier = document.getElementById("actualTier");
 const latency = document.getElementById("latency");
@@ -253,44 +317,57 @@ const inputTokens = document.getElementById("inputTokens");
 const outputTokens = document.getElementById("outputTokens");
 const totalTokens = document.getElementById("totalTokens");
 const httpStatus = document.getElementById("httpStatus");
+
 const modelTable = document.getElementById("modelTable");
+
 let models = [];
+
 const TIER_INFO = {
   standard: {
     name: "Standard",
     description: "Default synchronous inference at standard pricing."
   },
+
   flex: {
     name: "Flex",
     description: "50% cheaper than Standard, but variable latency and best-effort availability. Flex can return 503/429 when capacity is unavailable."
   },
+
   priority: {
     name: "Priority",
     description: "Premium synchronous inference with higher criticality. If Priority capacity limits are exceeded, Google may gracefully process the request at Standard."
   }
 };
+
 function getKey() {
   return apiKey.value.trim();
 }
+
 function saveKey() {
   if (rememberKey.checked) {
     localStorage.setItem("gemini-api-key", getKey());
     return;
   }
+
   localStorage.removeItem("gemini-api-key");
 }
+
 function updateTierDescription() {
   const info = TIER_INFO[serviceTier.value];
+
   if (!info) {
     tierDescription.textContent = "";
     return;
   }
+
   tierDescription.textContent = info.description;
 }
+
 function resetResult() {
   output.textContent = "";
   error.textContent = "";
   rawResponse.textContent = "";
+
   requestedTier.textContent = "—";
   actualTier.textContent = "—";
   latency.textContent = "—";
@@ -299,22 +376,29 @@ function resetResult() {
   totalTokens.textContent = "—";
   httpStatus.textContent = "—";
 }
+
 function setUsage(usage) {
   if (!usage) {
     return;
   }
+
   inputTokens.textContent =
     usage.promptTokenCount ?? "—";
+
   outputTokens.textContent =
     usage.candidatesTokenCount ?? "—";
+
   totalTokens.textContent =
     usage.totalTokenCount ?? "—";
 }
+
 function extractText(data) {
   const candidates = data?.candidates;
+
   if (!Array.isArray(candidates)) {
     return "";
   }
+
   return candidates
     .flatMap(function(candidate) {
       return candidate?.content?.parts ?? [];
@@ -327,19 +411,25 @@ function extractText(data) {
     })
     .join("");
 }
+
 function buildUrl(modelName, streaming) {
   const method = streaming
     ? "streamGenerateContent"
     : "generateContent";
+
   const url = new URL(
     `${API_ROOT}/models/${encodeURIComponent(modelName)}:${method}`
   );
+
   url.searchParams.set("key", getKey());
+
   if (streaming) {
     url.searchParams.set("alt", "sse");
   }
+
   return url;
 }
+
 function buildBody() {
   return {
     contents: [
@@ -352,13 +442,17 @@ function buildBody() {
         ]
       }
     ],
+
     service_tier: serviceTier.value
   };
 }
+
 function updateActualTier(response) {
   const tier =
     response.headers.get("x-gemini-service-tier");
+
   actualTier.textContent = tier ?? "not reported";
+
   if (
     serviceTier.value === "priority" &&
     tier === "standard"
@@ -366,186 +460,256 @@ function updateActualTier(response) {
     actualTier.className = "warning";
     return;
   }
+
   actualTier.className = "success";
 }
+
 async function readError(response) {
   const text = await response.text();
+
   try {
     const data = JSON.parse(text);
+
     return JSON.stringify(data, null, 2);
   } catch {
     return text;
   }
 }
+
 async function generateResponse() {
   resetResult();
+
   const key = getKey();
   const modelName = model.value;
+
   if (!key) {
     error.textContent = "Enter an API key.";
     return;
   }
+
   if (!modelName) {
     error.textContent = "Select a model.";
     return;
   }
+
   saveKey();
+
   requestedTier.textContent =
     TIER_INFO[serviceTier.value]?.name ?? serviceTier.value;
+
   const started = performance.now();
+
   try {
     const response = await fetch(
       buildUrl(modelName, false),
       {
         method: "POST",
+
         headers: {
           "Content-Type": "application/json"
         },
+
         body: JSON.stringify(buildBody())
       }
     );
+
     httpStatus.textContent = response.status;
+
     updateActualTier(response);
+
     latency.textContent =
       `${Math.round(performance.now() - started)} ms`;
+
     if (!response.ok) {
       error.textContent = await readError(response);
       return;
     }
+
     const data = await response.json();
+
     rawResponse.textContent =
       JSON.stringify(data, null, 2);
+
     output.textContent =
       extractText(data);
+
     setUsage(data.usageMetadata);
+
   } catch (exception) {
     latency.textContent =
       `${Math.round(performance.now() - started)} ms`;
+
     error.textContent =
       exception instanceof Error
         ? exception.stack ?? exception.message
         : String(exception);
   }
 }
+
 async function streamResponse() {
   resetResult();
+
   const key = getKey();
   const modelName = model.value;
+
   if (!key) {
     error.textContent = "Enter an API key.";
     return;
   }
+
   if (!modelName) {
     error.textContent = "Select a model.";
     return;
   }
+
   saveKey();
+
   requestedTier.textContent =
     TIER_INFO[serviceTier.value]?.name ?? serviceTier.value;
+
   const started = performance.now();
+
   try {
     const response = await fetch(
       buildUrl(modelName, true),
       {
         method: "POST",
+
         headers: {
           "Content-Type": "application/json"
         },
+
         body: JSON.stringify(buildBody())
       }
     );
+
     httpStatus.textContent = response.status;
+
     updateActualTier(response);
+
     if (!response.ok) {
       latency.textContent =
         `${Math.round(performance.now() - started)} ms`;
+
       error.textContent = await readError(response);
       return;
     }
+
     if (!response.body) {
       throw new Error("Response has no body.");
     }
+
     const reader =
       response.body.getReader();
+
     const decoder =
       new TextDecoder();
+
     let buffer = "";
     let fullText = "";
     let lastData = null;
+
     while (true) {
       const result = await reader.read();
+
       if (result.done) {
         break;
       }
+
       buffer += decoder.decode(
         result.value,
         { stream: true }
       );
+
       const lines = buffer.split("\n");
+
       buffer = lines.pop() ?? "";
+
       for (const line of lines) {
         if (!line.startsWith("data:")) {
           continue;
         }
+
         const json = line.slice(5).trim();
+
         if (!json || json === "[DONE]") {
           continue;
         }
+
         let data;
+
         try {
           data = JSON.parse(json);
         } catch {
           continue;
         }
+
         lastData = data;
+
         const text = extractText(data);
+
         if (text) {
           fullText += text;
           output.textContent = fullText;
         }
+
         if (data.usageMetadata) {
           setUsage(data.usageMetadata);
         }
       }
     }
+
     latency.textContent =
       `${Math.round(performance.now() - started)} ms`;
+
     rawResponse.textContent =
       lastData
         ? JSON.stringify(lastData, null, 2)
         : "";
+
   } catch (exception) {
     latency.textContent =
       `${Math.round(performance.now() - started)} ms`;
+
     error.textContent =
       exception instanceof Error
         ? exception.stack ?? exception.message
         : String(exception);
   }
 }
+
 function populateModels(data) {
   models = Array.isArray(data.models)
     ? data.models
     : [];
+
   models.sort(function(a, b) {
     return String(a.name).localeCompare(String(b.name));
   });
+
   model.replaceChildren();
+
   for (const item of models) {
     const option = document.createElement("option");
+
     option.value = item.name;
     option.textContent =
       item.displayName
         ? `${item.displayName} (${item.name})`
         : item.name;
+
     model.append(option);
   }
+
   renderModelTable();
 }
+
 function renderModelTable() {
   modelTable.replaceChildren();
+
   for (const item of models) {
     const row = document.createElement("tr");
+
     const values = [
       item.name,
       item.displayName ?? "",
@@ -558,35 +722,51 @@ function renderModelTable() {
         ? item.supportedGenerationMethods.join(", ")
         : ""
     ];
+
     for (const value of values) {
       const cell = document.createElement("td");
+
       cell.textContent = String(value);
+
       row.append(cell);
     }
+
     modelTable.append(row);
   }
 }
+
 async function loadModelList() {
   const key = getKey();
+
   if (!key) {
     error.textContent = "Enter an API key.";
     return;
   }
+
   saveKey();
+
   error.textContent = "";
+
   try {
     const url = new URL(`${API_ROOT}/models`);
+
     url.searchParams.set("key", key);
+
     const response = await fetch(url);
+
     if (!response.ok) {
       throw new Error(
         `HTTP ${response.status}\n${await readError(response)}`
       );
     }
+
     const data = await response.json();
+
     rawResponse.textContent =
       JSON.stringify(data, null, 2);
+
     populateModels(data);
+
   } catch (exception) {
     error.textContent =
       exception instanceof Error
@@ -594,38 +774,49 @@ async function loadModelList() {
         : String(exception);
   }
 }
+
 apiKey.value =
   localStorage.getItem("gemini-api-key") ?? "";
+
 rememberKey.checked =
   Boolean(apiKey.value);
+
 serviceTier.addEventListener(
   "change",
   updateTierDescription
 );
+
 apiKey.addEventListener(
   "change",
   saveKey
 );
+
 rememberKey.addEventListener(
   "change",
   saveKey
 );
+
 loadModels.addEventListener(
   "click",
   loadModelList
 );
+
 generate.addEventListener(
   "click",
   generateResponse
 );
+
 stream.addEventListener(
   "click",
   streamResponse
 );
+
 updateTierDescription();
+
 if (apiKey.value) {
   loadModelList();
 }
 </script>
+
 </body>
 </html>
