@@ -1,327 +1,65 @@
 <!doctype html>
 <html lang="en">
-
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Gemini Responses Console</title>
   <style>
-    :root {
-      color-scheme: dark;
-      --bg: #090c14;
-      --panel: #111725;
-      --panel2: #182135;
-      --line: #29344b;
-      --text: #edf2ff;
-      --muted: #94a3bd;
-      --accent: #7c9cff;
-      --accent2: #56dfc2;
-      --danger: #ff7b88;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      min-height: 100vh;
-      font: 15px/1.5 Inter, ui-sans-serif, system-ui, sans-serif;
-      color: var(--text);
-      background: radial-gradient(circle at 15% 0%, #172343 0, transparent 38%), var(--bg);
-    }
-
-    button,
-    input,
-    select,
-    textarea {
-      font: inherit;
-    }
-
-    .shell {
-      width: min(1100px, 100%);
-      min-height: 100vh;
-      margin: auto;
-      padding: 24px;
-      display: grid;
-      grid-template-rows: auto 1fr auto;
-      gap: 16px;
-    }
-
-    header,
-    .composer,
-    .settings {
-      border: 1px solid var(--line);
-      background: rgba(17, 23, 37, .88);
-      backdrop-filter: blur(14px);
-      border-radius: 18px;
-      box-shadow: 0 18px 60px #0005;
-    }
-
-    header {
-      padding: 18px 20px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 18px;
-    }
-
-    h1 {
-      margin: 0;
-      font-size: 18px;
-      letter-spacing: .01em;
-    }
-
-    .subtitle,
-    .status {
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    .badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      min-height: 28px;
-      padding: 4px 10px;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      color: var(--muted);
-      white-space: nowrap;
-    }
-
-    .dot {
-      width: 7px;
-      height: 7px;
-      border-radius: 50%;
-      background: var(--accent2);
-      box-shadow: 0 0 12px var(--accent2);
-    }
-
-    main {
-      min-height: 350px;
-      overflow: auto;
-      padding: 12px 4px 24px;
-      scroll-behavior: smooth;
-    }
-
-    .empty {
-      height: 100%;
-      display: grid;
-      place-items: center;
-      color: var(--muted);
-      text-align: center;
-    }
-
-    .empty strong {
-      display: block;
-      margin-bottom: 6px;
-      color: var(--text);
-      font-size: 24px;
-    }
-
-    .message {
-      max-width: 82%;
-      margin: 14px 0;
-      animation: appear .2s ease-out;
-    }
-
-    .message.user {
-      margin-left: auto;
-    }
-
-    .label {
-      margin: 0 8px 5px;
-      color: var(--muted);
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: .1em;
-    }
-
-    .bubble {
-      padding: 13px 15px;
-      border: 1px solid var(--line);
-      border-radius: 16px;
-      background: var(--panel);
-      white-space: pre-wrap;
-      overflow-wrap: anywhere;
-    }
-
-    .user .bubble {
-      border-color: #4963b0;
-      background: linear-gradient(135deg, #334d9a, #283d7b);
-    }
-
-    .error .bubble {
-      border-color: #7a3743;
-      color: #ffd9de;
-      background: #2a151c;
-    }
-
-    .meta {
-      margin: 5px 8px 0;
-      color: var(--muted);
-      font-size: 11px;
-    }
-
-    .composer {
-      padding: 12px;
-    }
-
-    textarea {
-      width: 100%;
-      min-height: 74px;
-      max-height: 220px;
-      resize: vertical;
-      padding: 10px 11px;
-      color: var(--text);
-      border: 0;
-      outline: 0;
-      background: transparent;
-    }
-
-    .bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      border-top: 1px solid var(--line);
-      padding: 10px 4px 0;
-    }
-
-    .actions {
-      display: flex;
-      gap: 8px;
-    }
-
-    button {
-      border: 1px solid var(--line);
-      border-radius: 10px;
-      padding: 8px 13px;
-      color: var(--text);
-      background: var(--panel2);
-      cursor: pointer;
-    }
-
-    button:hover {
-      border-color: #536688;
-    }
-
-    button.primary {
-      border-color: #6882de;
-      background: linear-gradient(135deg, #6687f5, #6d5dd8);
-      font-weight: 650;
-    }
-
-    button:disabled {
-      opacity: .45;
-      cursor: not-allowed;
-    }
-
-    details.settings {
-      padding: 0 16px;
-    }
-
-    summary {
-      cursor: pointer;
-      padding: 12px 0;
-      color: var(--muted);
-      user-select: none;
-    }
-
-    .grid {
-      padding: 0 0 16px;
-      display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 12px;
-    }
-
-    label {
-      display: grid;
-      gap: 5px;
-      color: var(--muted);
-      font-size: 12px;
-    }
-
-    label.wide {
-      grid-column: 1/-1;
-    }
-
-    label.toggle {
-      display: flex;
-      align-items: center;
-      gap: 9px;
-      color: var(--text);
-    }
-
-    label.toggle input {
-      width: auto;
-      accent-color: var(--accent);
-    }
-
-    input,
-    select {
-      width: 100%;
-      padding: 9px 10px;
-      border: 1px solid var(--line);
-      border-radius: 9px;
-      color: var(--text);
-      background: #0d1320;
-      outline: none;
-    }
-
-    input:focus,
-    select:focus {
-      border-color: var(--accent);
-    }
-
-    @keyframes appear {
-      from {
-        opacity: 0;
-        transform: translateY(5px);
-      }
-    }
-
-    @media (max-width:650px) {
-      .shell {
-        padding: 10px
-      }
-
-      .grid {
-        grid-template-columns: 1fr
-      }
-
-      .wide {
-        grid-column: auto !important
-      }
-
-      .message {
-        max-width: 94%
-      }
-
-      header {
-        align-items: flex-start;
-        flex-direction: column
-      }
-    }
-
+    :root { color-scheme: dark; --bg:#090c14; --panel:#111725; --panel2:#182135; --line:#29344b;
+      --text:#edf2ff; --muted:#94a3bd; --accent:#7c9cff; --accent2:#56dfc2; --danger:#ff7b88; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; font:15px/1.5 Inter,ui-sans-serif,system-ui,sans-serif; color:var(--text);
+      background:radial-gradient(circle at 15% 0%,#172343 0,transparent 38%),var(--bg); }
+    button,input,select,textarea { font:inherit; }
+    .shell { width:min(1100px,100%); min-height:100vh; margin:auto; padding:24px; display:grid;
+      grid-template-rows:auto 1fr auto; gap:16px; }
+    header,.composer,.settings { border:1px solid var(--line); background:rgba(17,23,37,.88);
+      backdrop-filter:blur(14px); border-radius:18px; box-shadow:0 18px 60px #0005; }
+    header { padding:18px 20px; display:flex; align-items:center; justify-content:space-between; gap:18px; }
+    h1 { margin:0; font-size:18px; letter-spacing:.01em; }
+    .subtitle,.status { color:var(--muted); font-size:12px; }
+    .badge { display:inline-flex; align-items:center; gap:7px; min-height:28px; padding:4px 10px;
+      border:1px solid var(--line); border-radius:999px; color:var(--muted); white-space:nowrap; }
+    .dot { width:7px; height:7px; border-radius:50%; background:var(--accent2); box-shadow:0 0 12px var(--accent2); }
+    main { min-height:350px; overflow:auto; padding:12px 4px 24px; scroll-behavior:smooth; }
+    .empty { height:100%; display:grid; place-items:center; color:var(--muted); text-align:center; }
+    .empty strong { display:block; margin-bottom:6px; color:var(--text); font-size:24px; }
+    .message { max-width:82%; margin:14px 0; animation:appear .2s ease-out; }
+    .message.user { margin-left:auto; }
+    .label { margin:0 8px 5px; color:var(--muted); font-size:11px; text-transform:uppercase; letter-spacing:.1em; }
+    .bubble { padding:13px 15px; border:1px solid var(--line); border-radius:16px; background:var(--panel); white-space:pre-wrap; overflow-wrap:anywhere; }
+    .user .bubble { border-color:#4963b0; background:linear-gradient(135deg,#334d9a,#283d7b); }
+    .error .bubble { border-color:#7a3743; color:#ffd9de; background:#2a151c; }
+    .meta { margin:5px 8px 0; color:var(--muted); font-size:11px; }
+    .composer { padding:12px; }
+    textarea { width:100%; min-height:74px; max-height:220px; resize:vertical; padding:10px 11px; color:var(--text);
+      border:0; outline:0; background:transparent; }
+    .bar { display:flex; align-items:center; justify-content:space-between; gap:10px; border-top:1px solid var(--line); padding:10px 4px 0; }
+    .actions { display:flex; gap:8px; }
+    button { border:1px solid var(--line); border-radius:10px; padding:8px 13px; color:var(--text); background:var(--panel2); cursor:pointer; }
+    button:hover { border-color:#536688; }
+    button.primary { border-color:#6882de; background:linear-gradient(135deg,#6687f5,#6d5dd8); font-weight:650; }
+    button:disabled { opacity:.45; cursor:not-allowed; }
+    details.settings { padding:0 16px; }
+    summary { cursor:pointer; padding:12px 0; color:var(--muted); user-select:none; }
+    .grid { padding:0 0 16px; display:grid; grid-template-columns:2fr 1fr; gap:12px; }
+    label { display:grid; gap:5px; color:var(--muted); font-size:12px; }
+    label.wide { grid-column:1/-1; }
+    label.toggle { display:flex; align-items:center; gap:9px; color:var(--text); }
+    label.toggle input { width:auto; accent-color:var(--accent); }
+    input,select { width:100%; padding:9px 10px; border:1px solid var(--line); border-radius:9px; color:var(--text); background:#0d1320; outline:none; }
+    input:focus,select:focus { border-color:var(--accent); }
+    @keyframes appear { from { opacity:0; transform:translateY(5px); } }
+    @media (max-width:650px) { .shell{padding:10px}.grid{grid-template-columns:1fr}.wide{grid-column:auto!important}.message{max-width:94%}header{align-items:flex-start;flex-direction:column} }
   </style>
 </head>
-
 <body>
   <div class="shell">
     <header>
-      <div>
-        <h1>Gemini Responses Console</h1>
-        <div class="subtitle">Streaming, stateful test client</div>
-      </div>
+      <div><h1>Gemini Responses Console</h1><div class="subtitle">Streaming, stateful test client</div></div>
       <div class="badge"><span class="dot"></span><span id="status">Ready</span></div>
     </header>
-    <main id="messages">
-      <div class="empty" id="empty">
-        <div><strong>Start a conversation</strong>Messages use the Responses API and server-side state.</div>
-      </div>
-    </main>
+    <main id="messages"><div class="empty" id="empty"><div><strong>Start a conversation</strong>Messages use the Responses API and server-side state.</div></div></main>
     <div>
       <details class="settings">
         <summary>Connection settings</summary>
@@ -335,242 +73,209 @@
       </details>
       <form class="composer" id="form">
         <textarea id="prompt" required autofocus placeholder="Message Gemini…"></textarea>
-        <div class="bar"><span class="status" id="conversation">New conversation</span>
-          <div class="actions">
-            <button type="button" id="reset">New chat</button><button type="button" id="stop" hidden>Stop</button>
-            <button class="primary" id="send">Send</button>
-          </div>
-        </div>
+        <div class="bar"><span class="status" id="conversation">New conversation</span><div class="actions">
+          <button type="button" id="reset">New chat</button><button type="button" id="stop" hidden>Stop</button>
+          <button class="primary" id="send">Send</button>
+        </div></div>
       </form>
     </div>
   </div>
-  <script>
-    const $ = (id) => document.getElementById(id);
-    const messages = $('messages');
-    let previousResponseId = null;
-    let controller = null;
-    let saveTimer = null;
-    let saveQueue = Promise.resolve();
-    const chatCache = 'gemini-responses-console-v1';
-    const chatKey = new Request(new URL('/__gemini_responses_console_chat__', location.origin));
-    const cachePromise = 'caches' in window ? caches.open(chatCache) : Promise.resolve(null);
+<script>
+  const $ = (id) => document.getElementById(id);
+  const messages = $('messages');
+  let previousResponseId = null;
+  let partialTurns = [];
+  let controller = null;
+  let saveTimer = null;
+  let saveQueue = Promise.resolve();
+  const chatCache = 'gemini-responses-console-v1';
+  const chatKey = new Request(new URL('/__gemini_responses_console_chat__', location.origin));
+  const cachePromise = 'caches' in window ? caches.open(chatCache) : Promise.resolve(null);
 
-    function emptyState() {
-      const empty = document.createElement('div');
-      empty.className = 'empty';
-      empty.id = 'empty';
-      const content = document.createElement('div');
-      const title = document.createElement('strong');
-      title.textContent = 'Start a conversation';
-      content.append(title, 'Messages use the Responses API and server-side state.');
-      empty.append(content);
-      return empty;
-    }
+  function emptyState() {
+    const empty = document.createElement('div'); empty.className='empty'; empty.id='empty';
+    const content = document.createElement('div');
+    const title = document.createElement('strong'); title.textContent='Start a conversation';
+    content.append(title, 'Messages use the Responses API and server-side state.');
+    empty.append(content); return empty;
+  }
 
-    function chatState() {
-      return {
-        version: 1,
-        previousResponseId,
-        errorAsAssistant: $('error-as-assistant').checked,
-        messages: [...messages.querySelectorAll('.message')].map((root) => ({
-          role: root.classList.contains('user') ? 'user' : 'assistant',
-          text: root.querySelector('.bubble')?.textContent ?? '',
-          meta: root.querySelector('.meta')?.textContent ?? '',
-          error: root.classList.contains('error')
-        }))
-      };
-    }
+  function chatState() {
+    return {
+      version: 3,
+      previousResponseId,
+      partialTurns,
+      errorAsAssistant: $('error-as-assistant').checked,
+      messages: [...messages.querySelectorAll('.message')].map((root) => ({
+        role: root.classList.contains('user') ? 'user' : 'assistant',
+        text: root.querySelector('.bubble')?.textContent ?? '',
+        meta: root.querySelector('.meta')?.textContent ?? '',
+        error: root.classList.contains('error')
+      }))
+    };
+  }
 
-    function persistChat() {
-      clearTimeout(saveTimer);
-      saveTimer = null;
-      const state = chatState();
-      saveQueue = saveQueue.then(async () => {
-        const cache = await cachePromise;
-        if (cache) await cache.put(chatKey, Response.json(state, {
-          headers: {
-            'Cache-Control': 'private, max-age=31536000'
-          }
-        }));
-      }).catch(() => {});
-      return saveQueue;
-    }
-
-    function schedulePersist() {
-      clearTimeout(saveTimer);
-      saveTimer = setTimeout(persistChat, 200);
-    }
-
-    async function restoreChat() {
-      try {
-        const cache = await cachePromise;
-        const response = await cache?.match(chatKey);
-        if (!response) return;
-        const state = await response.json();
-        if (state?.version !== 1 || !Array.isArray(state.messages)) return;
-        messages.replaceChildren();
-        for (const item of state.messages) {
-          if (!item || !['user', 'assistant'].includes(item.role) || typeof item.text !== 'string') continue;
-          const message = addMessage(item.role, item.text, item.error ? 'error' : '');
-          if (typeof item.meta === 'string') message.meta.textContent = item.meta;
-        }
-        if (!messages.children.length) messages.append(emptyState());
-        previousResponseId = typeof state.previousResponseId === 'string' ? state.previousResponseId : null;
-        $('error-as-assistant').checked = state.errorAsAssistant === true;
-        $('conversation').textContent = previousResponseId ?? 'New conversation';
-        messages.lastElementChild?.scrollIntoView({
-          block: 'end'
-        });
-      } catch {}
-    }
-
-    function addMessage(role, text = '', className = '') {
-      $('empty')?.remove();
-      const root = document.createElement('div');
-      root.className = `message ${role} ${className}`;
-      const label = document.createElement('div');
-      label.className = 'label';
-      label.textContent = role === 'user' ? 'You' : role === 'assistant' ? 'Gemini' : 'Error';
-      const bubble = document.createElement('div');
-      bubble.className = 'bubble';
-      bubble.textContent = text;
-      const meta = document.createElement('div');
-      meta.className = 'meta';
-      root.append(label, bubble, meta);
-      messages.append(root);
-      root.scrollIntoView({
-        behavior: 'smooth',
-        block: 'end'
-      });
-      return {
-        root,
-        bubble,
-        meta
-      };
-    }
-
-    function setBusy(busy) {
-      $('send').disabled = busy;
-      $('reset').disabled = busy;
-      $('stop').hidden = !busy;
-      $('status').textContent = busy ? 'Generating…' : 'Ready';
-    }
-
-    async function consumeSse(response, message) {
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-      while (true) {
-        const {
-          value,
-          done
-        } = await reader.read();
-        buffer += decoder.decode(value, {
-          stream: !done
-        });
-        const frames = buffer.split(/\r?\n\r?\n/);
-        buffer = frames.pop() ?? '';
-        for (const frame of frames) {
-          const data = frame.split(/\r?\n/).filter((line) => line.startsWith('data:'))
-            .map((line) => line.slice(5).trimStart()).join('\n');
-          if (!data || data === '[DONE]') continue;
-          const event = JSON.parse(data);
-          if (event.type === 'response.output_text.delta') {
-            message.bubble.textContent += event.delta ?? '';
-            message.root.scrollIntoView({
-              block: 'end'
-            });
-            schedulePersist();
-          } else if (event.type === 'response.completed' || event.type === 'response.incomplete') {
-            if (event.response?.model !== 'erroneous') {
-              previousResponseId = event.response?.id ?? previousResponseId;
-            }
-            $('conversation').textContent = previousResponseId ?? 'New conversation';
-            schedulePersist();
-          } else if (event.type === 'response.failed' || event.type === 'error') {
-            throw new Error(event.response?.error?.message ?? event.message ?? 'Streaming request failed');
-          }
-        }
-        if (done) break;
-      }
-    }
-
-    $('form').addEventListener('submit', async (event) => {
-      event.preventDefault();
-      const prompt = $('prompt').value.trim();
-      if (!prompt || controller) return;
-      addMessage('user', prompt);
-      $('prompt').value = '';
-      const assistant = addMessage('assistant');
-      schedulePersist();
-      controller = new AbortController();
-      setBusy(true);
-      try {
-        const body = {
-          model: $('model').value.trim(),
-          input: prompt,
-          stream: true,
-          store: true
-        };
-        if (previousResponseId) body.previous_response_id = previousResponseId;
-        if ($('instructions').value.trim()) body.instructions = $('instructions').value.trim();
-        const headers = {
-          'Content-Type': 'application/json'
-        };
-        if ($('token').value) headers.Authorization = `Bearer ${$('token').value}`;
-        if ($('error-as-assistant').checked) headers['X-Gemini-Error-As-Assistant'] = 'true';
-        const response = await fetch($('endpoint').value.trim(), {
-          method: 'POST',
-          headers,
-          body: JSON.stringify(body),
-          signal: controller.signal
-        });
-        assistant.meta.textContent = [response.headers.get('X-Gemini-Model'), response.headers.get('X-Gemini-Service-Tier')]
-          .filter(Boolean).join(' · ');
-        schedulePersist();
-        if (!response.ok) {
-          const error = await response.json().catch(() => null);
-          throw new Error(error?.error?.message ?? `HTTP ${response.status}`);
-        }
-        await consumeSse(response, assistant);
-        if (!assistant.bubble.textContent) assistant.bubble.textContent = '(No text output)';
-      } catch (error) {
-        if (error.name === 'AbortError') assistant.bubble.textContent ||= '(Stopped)';
-        else {
-          assistant.root.classList.add('error');
-          assistant.bubble.textContent = error.message;
-        }
-      } finally {
-        controller = null;
-        setBusy(false);
-        await persistChat();
-        $('prompt').focus();
-      }
-    });
-
-    $('stop').addEventListener('click', () => controller?.abort());
-    $('reset').addEventListener('click', async () => {
-      clearTimeout(saveTimer);
-      saveTimer = null;
-      previousResponseId = null;
-      messages.replaceChildren();
-      messages.append(emptyState());
-      $('conversation').textContent = 'New conversation';
-      await saveQueue;
+  function persistChat() {
+    clearTimeout(saveTimer); saveTimer = null;
+    const state = chatState();
+    saveQueue = saveQueue.then(async () => {
       const cache = await cachePromise;
-      await cache?.delete(chatKey);
-      $('prompt').focus();
-    });
-    $('prompt').addEventListener('keydown', (event) => {
-      if (event.key === 'Enter' && !event.shiftKey) {
-        event.preventDefault();
-        $('form').requestSubmit();
+      if (cache) await cache.put(chatKey, Response.json(state, {
+        headers: { 'Cache-Control':'private, max-age=31536000' }
+      }));
+    }).catch(() => {});
+    return saveQueue;
+  }
+
+  function schedulePersist() {
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(persistChat, 200);
+  }
+
+  async function restoreChat() {
+    try {
+      const cache = await cachePromise;
+      const response = await cache?.match(chatKey);
+      if (!response) return;
+      const state = await response.json();
+      if (![1,2,3].includes(state?.version) || !Array.isArray(state.messages)) return;
+      messages.replaceChildren();
+      for (const item of state.messages) {
+        if (!item || !['user','assistant'].includes(item.role) || typeof item.text !== 'string') continue;
+        const message = addMessage(item.role, item.text, item.error ? 'error' : '');
+        if (typeof item.meta === 'string') message.meta.textContent = item.meta;
       }
-    });
-    $('error-as-assistant').addEventListener('change', persistChat);
-    restoreChat();
+      if (!messages.children.length) messages.append(emptyState());
+      // Version 1 could cache an interrupted interaction ID. Keep its messages,
+      // but reset the server-side chain so it cannot cause "entity not found".
+      previousResponseId = state.version >= 2 && typeof state.previousResponseId === 'string'
+        ? state.previousResponseId : null;
+      partialTurns = state.version === 3 && Array.isArray(state.partialTurns)
+        ? state.partialTurns.filter((turn) => turn && typeof turn.user === 'string'
+          && typeof turn.assistant === 'string') : [];
+      $('error-as-assistant').checked = state.errorAsAssistant === true;
+      $('conversation').textContent = previousResponseId ?? 'New conversation';
+      messages.lastElementChild?.scrollIntoView({ block:'end' });
+    } catch {}
+  }
 
-  </script>
+  function addMessage(role, text = '', className = '') {
+    $('empty')?.remove();
+    const root = document.createElement('div');
+    root.className = `message ${role} ${className}`;
+    const label = document.createElement('div');
+    label.className = 'label'; label.textContent = role === 'user' ? 'You' : role === 'assistant' ? 'Gemini' : 'Error';
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble'; bubble.textContent = text;
+    const meta = document.createElement('div'); meta.className = 'meta';
+    root.append(label, bubble, meta); messages.append(root); root.scrollIntoView({ behavior:'smooth', block:'end' });
+    return { root, bubble, meta };
+  }
+
+  function setBusy(busy) {
+    $('send').disabled = busy; $('reset').disabled = busy; $('stop').hidden = !busy;
+    $('status').textContent = busy ? 'Generating…' : 'Ready';
+  }
+
+  async function consumeSse(response, message) {
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let outcome = null;
+    while (true) {
+      const { value, done } = await reader.read();
+      buffer += decoder.decode(value, { stream: !done });
+      const frames = buffer.split(/\r?\n\r?\n/); buffer = frames.pop() ?? '';
+      for (const frame of frames) {
+        const data = frame.split(/\r?\n/).filter((line) => line.startsWith('data:'))
+          .map((line) => line.slice(5).trimStart()).join('\n');
+        if (!data || data === '[DONE]') continue;
+        const event = JSON.parse(data);
+        if (event.type === 'response.output_text.delta') {
+          message.bubble.textContent += event.delta ?? '';
+          message.root.scrollIntoView({ block:'end' });
+          schedulePersist();
+        } else if (event.type === 'response.completed') {
+          if (event.response?.model !== 'erroneous') {
+            previousResponseId = event.response?.id ?? previousResponseId;
+            outcome = 'completed';
+          }
+          $('conversation').textContent = previousResponseId ?? 'New conversation';
+          schedulePersist();
+        } else if (event.type === 'response.incomplete') {
+          outcome = 'incomplete';
+          schedulePersist();
+        } else if (event.type === 'response.failed' || event.type === 'error') {
+          throw new Error(event.response?.error?.message ?? event.message ?? 'Streaming request failed');
+        }
+      }
+      if (done) break;
+    }
+    return outcome;
+  }
+
+  function replayInput(prompt) {
+    if (!partialTurns.length) return prompt;
+    const recovered = partialTurns.map((turn, index) =>
+      `Interrupted turn ${index + 1}:\nUser message:\n${turn.user}\n\nPartial assistant response:\n${turn.assistant}`
+    ).join('\n\n');
+    return [
+      { role:'user', content:`Context recovery note: the following prior turns were interrupted. `
+        + `Treat partial assistant text as incomplete context, not a finished answer.\n\n${recovered}` },
+      { role:'user', content:prompt }
+    ];
+  }
+
+  $('form').addEventListener('submit', async (event) => {
+    event.preventDefault();
+    const prompt = $('prompt').value.trim();
+    if (!prompt || controller) return;
+    addMessage('user', prompt); $('prompt').value = '';
+    const assistant = addMessage('assistant');
+    schedulePersist();
+    controller = new AbortController(); setBusy(true);
+    try {
+      const body = { model:$('model').value.trim(), input:replayInput(prompt), stream:true, store:true };
+      if (previousResponseId) body.previous_response_id = previousResponseId;
+      if ($('instructions').value.trim()) body.instructions = $('instructions').value.trim();
+      const headers = { 'Content-Type':'application/json' };
+      if ($('token').value) headers.Authorization = `Bearer ${$('token').value}`;
+      if ($('error-as-assistant').checked) headers['X-Gemini-Error-As-Assistant'] = 'true';
+      const response = await fetch($('endpoint').value.trim(), {
+        method:'POST', headers, body:JSON.stringify(body), signal:controller.signal
+      });
+      assistant.meta.textContent = [response.headers.get('X-Gemini-Model'), response.headers.get('X-Gemini-Service-Tier')]
+        .filter(Boolean).join(' · ');
+      schedulePersist();
+      if (!response.ok) {
+        const error = await response.json().catch(() => null);
+        throw new Error(error?.error?.message ?? `HTTP ${response.status}`);
+      }
+      const outcome = await consumeSse(response, assistant);
+      if (outcome === 'incomplete') {
+        partialTurns.push({ user:prompt, assistant:assistant.bubble.textContent });
+      } else if (outcome === 'completed') {
+        partialTurns = [];
+      }
+      if (!assistant.bubble.textContent) assistant.bubble.textContent = '(No text output)';
+    } catch (error) {
+      if (error.name === 'AbortError') assistant.bubble.textContent ||= '(Stopped)';
+      else { assistant.root.classList.add('error'); assistant.bubble.textContent = error.message; }
+    } finally { controller = null; setBusy(false); await persistChat(); $('prompt').focus(); }
+  });
+
+  $('stop').addEventListener('click', () => controller?.abort());
+  $('reset').addEventListener('click', async () => {
+    clearTimeout(saveTimer); saveTimer = null;
+    previousResponseId = null; partialTurns = []; messages.replaceChildren();
+    messages.append(emptyState()); $('conversation').textContent='New conversation';
+    await saveQueue; const cache = await cachePromise; await cache?.delete(chatKey); $('prompt').focus();
+  });
+  $('prompt').addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); $('form').requestSubmit(); }
+  });
+  $('error-as-assistant').addEventListener('change', persistChat);
+  restoreChat();
+</script>
 </body>
-
 </html>
