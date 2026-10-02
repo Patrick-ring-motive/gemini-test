@@ -676,8 +676,7 @@
     function populateModels(data) {
       models =
         Array.isArray(data.models) ?
-        data.models :
-        [];
+        data.models : [];
       models.sort(function(a, b) {
         return String(a.name)
           .localeCompare(
